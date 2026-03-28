@@ -21,12 +21,20 @@ import Constants from 'expo-constants';
 
 // Dynamically detect host IP for mobile testing (Expo Go)
 // Fallback to localhost for web/emulator
+// Dynamically detects backend API source
+// 1. Prioritize environment variable or app.config override
+// 2. Fallback to host IP detection for local Expo Go testing
+// 3. Last resort fallback to hardcoded laptop IP
 const getApiUrl = () => {
+  const extraApiUrl = Constants.expoConfig?.extra?.apiUrl;
+  if (extraApiUrl) return extraApiUrl;
+
   const host = Constants.expoConfig?.hostUri?.split(':').shift();
   if (host && !['localhost', '127.0.0.1'].includes(host)) {
     return `http://${host}:5000/api`;
   }
-  return 'http://localhost:5000/api';
+  
+  return 'http://192.168.1.10:5000/api';
 };
 
 export const API_URL = getApiUrl();
@@ -103,7 +111,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Navigate directly after login — don't rely on useEffect
       navigateToRoleDashboard(router, loggedUser.role);
     } catch (err: any) {
-      throw new Error(err.response?.data?.message || 'Login failed');
+      const errorContext = `[Target: ${API_URL}]`;
+      const msg = err.response?.data?.message || err.message || 'Network error';
+      throw new Error(`${msg} ${errorContext}`);
     }
   };
 

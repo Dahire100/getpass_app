@@ -81,6 +81,15 @@ export default function LoginScreen() {
             <Text style={styles.loginButtonText}>Login</Text>
           </TouchableOpacity>
 
+          <View style={{ marginTop: 24, alignItems: 'center' }}>
+            <Text style={{ color: Colors.textSecondary, fontSize: 11, fontStyle: 'italic' }}>
+              Connection: {require('../context/AuthContext').API_URL}
+            </Text>
+            <Text style={{ color: Colors.textSecondary, fontSize: 10, marginTop: 4 }}>
+              Tip: Ensure laptop & phone are on the same Wi-Fi
+            </Text>
+          </View>
+
           <TouchableOpacity style={styles.registerLink} onPress={() => router.push('/(auth)/role-select')}>
             <Text style={styles.registerLinkText}>Don't have an account? <Text style={styles.registerLinkSpan}>Register</Text></Text>
           </TouchableOpacity>

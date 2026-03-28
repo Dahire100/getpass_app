@@ -5,6 +5,7 @@ import { useAuth, API_URL } from '../context/AuthContext';
 import { ArrowLeft, History as HistoryIcon, Home, QrCode as QrIcon, User as UserIcon, Clock, Calendar } from 'lucide-react-native';
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import { cacheData, getCachedData } from '../utils/cache';
 
 export default function HistoryScreen() {
   const router = useRouter();
@@ -17,15 +18,27 @@ export default function HistoryScreen() {
     try {
       const res = await axios.get(`${API_URL}/passes/history`);
       setPasses(res.data);
+      return res.data;
     } catch (err) {
       console.error('Failed to fetch passes', err);
+      return null;
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  useEffect(() => { fetchPasses(); }, []);
+  useEffect(() => { 
+    const loadCache = async () => {
+      const cached = await getCachedData('student_history');
+      if (cached) setPasses(cached);
+    };
+    loadCache();
+
+    fetchPasses().then(data => {
+      if (data) cacheData('student_history', data);
+    });
+  }, []);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);

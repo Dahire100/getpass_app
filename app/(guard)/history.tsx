@@ -5,6 +5,7 @@ import { useAuth, API_URL } from '../context/AuthContext';
 import { ArrowLeft, Home, QrCode as QrIcon, History as HistoryIcon, User as UserIcon, CheckCircle, Clock } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { cacheData, getCachedData } from '../utils/cache';
 
 export default function GuardHistoryScreen() {
   const router = useRouter();
@@ -16,14 +17,26 @@ export default function GuardHistoryScreen() {
       try {
         const res = await axios.get(`${API_URL}/passes/all`);
         // Show scans the guard has processed (approved, completed, etc)
-        setPasses(res.data.filter((p: any) => ['approved', 'completed', 'expired', 'rejected'].includes(p.status.toLowerCase())));
+        const scannedPasses = res.data.filter((p: any) => ['approved', 'completed', 'expired', 'rejected'].includes(p.status.toLowerCase()));
+        setPasses(scannedPasses);
+        return scannedPasses;
       } catch (err) {
         console.error('Failed to fetch passes', err);
+        return null;
       } finally {
         setLoading(false);
       }
     };
-    fetchPasses();
+
+    const loadCache = async () => {
+      const cached = await getCachedData('guard_history');
+      if (cached) setPasses(cached);
+    };
+    loadCache();
+    
+    fetchPasses().then(data => {
+      if (data) cacheData('guard_history', data);
+    });
   }, []);
 
   return (
