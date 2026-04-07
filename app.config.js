@@ -3,7 +3,7 @@ import 'dotenv/config';
 export default {
   "expo": {
     "name": "Gatepass App",
-    "slug": "gatepass-app",
+    "slug": "app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
